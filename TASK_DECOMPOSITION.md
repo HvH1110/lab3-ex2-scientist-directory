@@ -20,7 +20,7 @@ result count. Filtering and sorting are derived during render with zero `useEffe
 ## Checklist
 
 - [x] Task 2.0: Write `project-rules.md` and `TASK_DECOMPOSITION.md`
-- [ ] Task 2.1: Scaffold React 19 toolchain
+- [x] Task 2.1: Scaffold React 19 toolchain
 - [ ] Task 2.2: Define contracts
 - [ ] Task 2.3: Normalize `smartPeople` with stable ids
 - [ ] Task 2.4: Add search, IQ filter and `.toSorted()`
