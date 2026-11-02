@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { readNumberInput } from '../lib/select-visible';
 import { SORT_OPTIONS, isSortKey, type DirectoryFilters, type SortKey } from '../types';
+import styles from './FilterControls.module.css';
 
 export interface FilterControlsProps extends DirectoryFilters {
   readonly onQueryChange: (query: string) => void;
@@ -15,8 +16,8 @@ export function FilterControls({ query, minIq, sortBy, onQueryChange, onMinIqCha
   const sortId = useId();
 
   return (
-    <form role="search" aria-label="Filter pioneers" onSubmit={(e) => e.preventDefault()}>
-      <p>
+    <form className={styles.filters} role="search" aria-label="Filter pioneers" onSubmit={(e) => e.preventDefault()}>
+      <p className={styles.field}>
         <label htmlFor={searchId}>Name</label>
         <input
           id={searchId}
@@ -27,7 +28,7 @@ export function FilterControls({ query, minIq, sortBy, onQueryChange, onMinIqCha
           onChange={(e) => onQueryChange(e.target.value)}
         />
       </p>
-      <p>
+      <p className={styles.field}>
         <label htmlFor={iqId}>Minimum IQ</label>
         <input
           id={iqId}
@@ -40,7 +41,7 @@ export function FilterControls({ query, minIq, sortBy, onQueryChange, onMinIqCha
           onChange={(e) => onMinIqChange(readNumberInput(e.target))}
         />
       </p>
-      <p>
+      <p className={styles.field}>
         <label htmlFor={sortId}>Sort by</label>
         <select
           id={sortId}

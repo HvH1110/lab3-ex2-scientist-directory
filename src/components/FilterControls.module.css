@@ -1,0 +1,32 @@
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space);
+  margin: 0;
+  padding: var(--space);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.field {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.field label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}

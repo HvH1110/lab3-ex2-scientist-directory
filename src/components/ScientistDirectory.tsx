@@ -4,6 +4,7 @@ import { SMART_PEOPLE } from '../data/smart-people';
 import { selectVisiblePeople } from '../lib/select-visible';
 import { DEFAULT_FILTERS, type Pioneer, type SortKey } from '../types';
 import { FilterControls } from './FilterControls';
+import styles from './ScientistDirectory.module.css';
 
 export interface ScientistDirectoryProps {
   readonly initialData?: readonly Pioneer[];
@@ -38,8 +39,8 @@ export function ScientistDirectory({ initialData = SMART_PEOPLE }: ScientistDire
   };
 
   return (
-    <section aria-labelledby={headingId}>
-      <h2 id={headingId} ref={headingRef} tabIndex={-1}>
+    <section className={styles.directory} aria-labelledby={headingId}>
+      <h2 className={styles.heading} id={headingId} ref={headingRef} tabIndex={-1}>
         Pioneer Directory
       </h2>
       <FilterControls
@@ -50,29 +51,30 @@ export function ScientistDirectory({ initialData = SMART_PEOPLE }: ScientistDire
         onMinIqChange={setMinIq}
         onSortChange={setSortBy}
       />
-      <p>
+      <p className={styles.toolbar}>
         <output role="status" aria-live="polite">
           Found {visible.length} {visible.length === 1 ? 'pioneer' : 'pioneers'} of {people.length}
         </output>
-        <button type="button" onClick={handleReset} disabled={deletedCount === 0}>
+        <button className={styles.reset} type="button" onClick={handleReset} disabled={deletedCount === 0}>
           Reset list{deletedCount > 0 ? ` (${deletedCount} deleted)` : ''}
         </button>
       </p>
       {visible.length === 0 ? (
-        <p>No pioneers match these filters.</p>
+        <p className={styles.empty}>No pioneers match these filters.</p>
       ) : (
-        <ul aria-label="Pioneers">
+        <ul className={styles.list} aria-label="Pioneers">
           {visible.map((person) => (
             <li key={person.id}>
-              <article aria-labelledby={`${headingId}-${person.id}`}>
+              <article className={styles.card} aria-labelledby={`${headingId}-${person.id}`}>
                 <h3 id={`${headingId}-${person.id}`}>{person.name}</h3>
-                <dl>
+                <dl className={styles.stats}>
                   <dt>Age</dt>
                   <dd>{person.age}</dd>
                   <dt>IQ</dt>
                   <dd>{person.iq}</dd>
                 </dl>
                 <button
+                  className={styles.delete}
                   type="button"
                   aria-label={`Delete ${person.name}`}
                   onClick={() => handleDelete(person.id)}
