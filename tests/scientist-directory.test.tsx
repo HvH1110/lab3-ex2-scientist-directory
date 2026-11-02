@@ -4,10 +4,13 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { ScientistDirectory } from '../src/components/ScientistDirectory';
 import { SMART_PEOPLE } from '../src/data/smart-people';
 
-const rowNames = (): string[] =>
-  within(screen.getByRole('list', { name: 'Pioneers' }))
-    .queryAllByRole('heading', { level: 3 })
-    .map((h) => h.textContent ?? '');
+const rowNames = (): string[] => {
+  const list = screen.queryByRole('list', { name: 'Pioneers' });
+  return list === null ? [] : within(list).getAllByRole('heading', { level: 3 }).map((h) => h.textContent ?? '');
+};
+const status = (): string => screen.getByRole('status').textContent ?? '';
+const deleteButton = (name: string): HTMLElement => screen.getByRole('button', { name: `Delete ${name}` });
+const resetButton = (): HTMLButtonElement => screen.getByRole<HTMLButtonElement>('button', { name: /^Reset list/ });
 
 const allData = { initialData: SMART_PEOPLE };
 
@@ -101,6 +104,88 @@ describe('ScientistDirectory: derived pipeline', () => {
     const goethe = screen.getByRole('article', { name: 'Johann Goethe' });
     fireEvent.change(screen.getByLabelText('Sort by'), { target: { value: 'name-asc' } });
     expect(screen.getByRole('article', { name: 'Johann Goethe' })).toBe(goethe);
+  });
+});
+
+describe('ScientistDirectory: delete, reset & live status', () => {
+  it('announces the result count in a polite live region', () => {
+    render(<ScientistDirectory {...allData} />);
+    const output = screen.getByRole('status');
+    expect(output.tagName).toBe('OUTPUT');
+    expect(output.getAttribute('aria-live')).toBe('polite');
+    expect(status()).toBe('Found 6 pioneers of 6');
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'newton' } });
+    expect(status()).toBe('Found 1 pioneer of 6');
+  });
+
+  it('shows an empty-state message instead of an empty list', () => {
+    render(<ScientistDirectory {...allData} />);
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'zzz' } });
+    expect(screen.queryByRole('list', { name: 'Pioneers' })).toBeNull();
+    expect(screen.getByText('No pioneers match these filters.')).toBeDefined();
+    expect(status()).toBe('Found 0 pioneers of 6');
+  });
+
+  it('deletes one row immutably and keeps the other rows mounted', () => {
+    render(<ScientistDirectory {...allData} />);
+    const einstein = screen.getByRole('article', { name: 'Albert Einstein' });
+    fireEvent.click(deleteButton('Johann Goethe'));
+    expect(rowNames()).not.toContain('Johann Goethe');
+    expect(screen.getByRole('article', { name: 'Albert Einstein' })).toBe(einstein);
+    expect(status()).toBe('Found 5 pioneers of 5');
+    expect(SMART_PEOPLE).toHaveLength(6);
+  });
+
+  it('moves focus to the next row after a delete', () => {
+    render(<ScientistDirectory {...allData} />);
+    fireEvent.click(deleteButton('Johann Goethe'));
+    expect(document.activeElement).toBe(deleteButton('Albert Einstein'));
+  });
+
+  it('moves focus to the previous row when the last row is deleted', () => {
+    render(<ScientistDirectory {...allData} />);
+    fireEvent.click(deleteButton('Leonardo da Vinci'));
+    expect(document.activeElement).toBe(deleteButton('James Maxwell'));
+  });
+
+  it('uses the visible (filtered, sorted) order to pick the neighbour', () => {
+    render(<ScientistDirectory {...allData} />);
+    fireEvent.change(screen.getByLabelText('Minimum IQ'), { target: { value: '200' } });
+    fireEvent.click(deleteButton('Albert Einstein'));
+    expect(document.activeElement).toBe(deleteButton('William Sidis'));
+  });
+
+  it('moves focus to the heading when the last visible row is deleted', () => {
+    render(<ScientistDirectory {...allData} />);
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'newton' } });
+    fireEvent.click(deleteButton('Isaac Newton'));
+    expect(document.activeElement).toBe(screen.getByRole('heading', { level: 2 }));
+  });
+
+  it('resets to the original snapshot and reports how many were deleted', () => {
+    render(<ScientistDirectory {...allData} />);
+    expect(resetButton().disabled).toBe(true);
+    fireEvent.click(deleteButton('Johann Goethe'));
+    fireEvent.click(deleteButton('Isaac Newton'));
+    expect(resetButton().textContent).toBe('Reset list (2 deleted)');
+    fireEvent.click(resetButton());
+    expect(rowNames()).toHaveLength(6);
+    expect(resetButton().disabled).toBe(true);
+    expect(document.activeElement).toBe(screen.getByRole('heading', { level: 2 }));
+  });
+
+  it('keeps the filters when the list is reset', () => {
+    render(<ScientistDirectory {...allData} />);
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'i' } });
+    fireEvent.click(deleteButton('William Sidis'));
+    fireEvent.click(resetButton());
+    expect(screen.getByLabelText<HTMLInputElement>('Name').value).toBe('i');
+    expect(rowNames()).toContain('William Sidis');
+  });
+
+  it('gives every button an explicit type', () => {
+    render(<ScientistDirectory {...allData} />);
+    for (const button of screen.getAllByRole('button')) expect(button.getAttribute('type')).toBe('button');
   });
 });
 

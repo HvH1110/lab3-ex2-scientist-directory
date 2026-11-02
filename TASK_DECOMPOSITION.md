@@ -24,6 +24,6 @@ result count. Filtering and sorting are derived during render with zero `useEffe
 - [x] Task 2.2: Define contracts
 - [x] Task 2.3: Normalize `smartPeople` with stable ids
 - [x] Task 2.4: Add search, IQ filter and `.toSorted()`
-- [ ] Task 2.5: Add delete/reset and live status
+- [x] Task 2.5: Add delete/reset and live status
 - [ ] Task 2.6: Add responsive CSS Module
 - [ ] Task 2.7: Document Checkpoint 2 audit in README
